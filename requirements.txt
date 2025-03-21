@@ -1,0 +1,13 @@
+opencv-python
+scikit-image
+streamlit
+streamlit-cropper
+faiss-cpu==1.8.0
+
+fastapi==0.70.0
+uvicorn==0.15.0
+numpy==1.23.5
+pillow==9.2.0
+python-multipart
+torch
+torchvision
