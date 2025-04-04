@@ -110,6 +110,8 @@ python evaluate.py --feature_extractor Resnet50
 streamlit run demo.py
 ```
 
+![Demo](readme/demo.gif)
+
 ## Configuration Options
 
 The system supports various configuration parameters:
@@ -123,6 +125,8 @@ The system supports various configuration parameters:
 This research uses the [Deep Fashion Dataset](https://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html), which contains 239,557 number of consumer/shop clothes images. The dataset includes ground truth files for evaluation.
 
 # Dataset Download Guide for VNIU-VNR50
+
+![VNIU-VNR50 Dataset](readme/VNIU-VNR50.png)
 
 ## Downloading Dataset
 
