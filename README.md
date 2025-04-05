@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15151481.svg)](https://doi.org/10.5281/zenodo.15151481)
+
 # Image Retrieval in Fashion: A Content-Based Approach
 
 ## Abstract
@@ -154,11 +156,35 @@ dataset/
    ├── image1.jpg
    ├── image2.jpg
    ...
+```
 
-
-* Acknowledgments
+## Acknowledgments
 
 - [FAISS](https://github.com/facebookresearch/faiss) by Facebook Research
 - Pre-trained models from [torchvision.models](https://pytorch.org/vision/stable/models.html)
 - [Deep Fashion Dataset](https://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html) by the Visual Geometry Group
+
+## 📌 Citation and DOI
+
+If you use this code or data in your research, please cite it using the DOI below:
+
+**DOI**: [https://doi.org/10.5281/zenodo.15151481](https://doi.org/10.5281/zenodo.15151481)
+
+## 📚 Related Publication
+
+This code is associated with the article:
+
+**Title**: Vision Transformer for Fashion Image Retrieval: A Comprehensive Evaluation on Real-World Datasets  
+**Journal**: _The Visual Computer_ (Springer)
+
+Please cite this paper if you find the work helpful.
+
+```
+@article{ 10.5281/zenodo.15151481,
+    title={Vision Transformer for Fashion Image Retrieval: A Comprehensive Evaluation on Real-World Datasets},
+    author={Truc Nguyen, Ninh Nguyen, Vu Tran, Qui Nguyen, Trinh Huynh},
+    journal={The Visual Computer},
+    year={2025},
+    publisher={Springer}
+  }
 ```
