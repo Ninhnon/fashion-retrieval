@@ -5,7 +5,7 @@ import faiss
 import torch
 from torch.utils.data import DataLoader, SequentialSampler
 
-from src.feature_extraction import MyResnet50, MyVGG16, RGBHistogram, LBP, MyCLIP, MyEfficientNetV2, MyViT
+from src.feature_extraction import MyResnet50, RGBHistogram, LBP, MyCLIP, MyEfficientNetV2, MyViT
 from src.indexing import get_faiss_indexer
 from src.dataloader import MyDataLoader
 import os
@@ -32,8 +32,6 @@ def main():
     # Load module feature extraction 
     if (args.feature_extractor == 'Resnet50'):
         extractor = MyResnet50()
-    elif (args.feature_extractor == 'VGG16'):
-        extractor = MyVGG16()
     elif (args.feature_extractor == 'EfficientNetV2'):
         extractor = MyEfficientNetV2()
     elif (args.feature_extractor == 'VIT'):

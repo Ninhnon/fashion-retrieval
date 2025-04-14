@@ -9,7 +9,7 @@ import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
-from src.feature_extraction import MyVGG16, MyResnet50, RGBHistogram, LBP, MyEfficientNetV2, MyViT
+from src.feature_extraction import MyResnet50, RGBHistogram, LBP, MyEfficientNetV2, MyViT
 from src.dataloader import get_transformation 
 import streamlit as st
 from streamlit_cropper import st_cropper
@@ -36,9 +36,7 @@ def get_image_list(image_root):
 
 
 def retrieve_image(img, feature_extractor):
-    if feature_extractor == 'VGG16':
-        extractor = MyVGG16()
-    elif feature_extractor == 'Resnet50':
+    if feature_extractor == 'Resnet50':
         extractor = MyResnet50()
     elif feature_extractor == 'EfficientNetV2':
         extractor = MyEfficientNetV2()
@@ -74,7 +72,7 @@ def main():
         st.header('QUERY')
 
         st.subheader('Choose feature extractor')
-        option = st.selectbox('.', ( 'Resnet50', 'VGG16','EfficientNetV2','VIT', 'RGBHistogram', 'LBP'))
+        option = st.selectbox('.', ( 'Resnet50','EfficientNetV2','VIT', 'RGBHistogram', 'LBP'))
 
         st.subheader('Upload image')
         img_file = st.file_uploader(label='.', type=['png', 'jpg'])
