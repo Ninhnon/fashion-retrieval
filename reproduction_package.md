@@ -182,8 +182,8 @@ streamlit run demo.py
 
 - All experiments run using batch size of 64
 - Hardware: NVIDIA RTX 3080 GPU
-- Deep Fashion Dataset: ~200K images
-- VNIU-VNR50 Dataset: ~50K images
+- Deep Fashion Dataset: ~240K images
+- VNIU-VNR50 Dataset: ~1,5K images
 - Results averaged over multiple runs
 
 ## Reproduction Notes

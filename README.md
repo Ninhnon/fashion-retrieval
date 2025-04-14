@@ -1,190 +1,310 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15151481.svg)](https://doi.org/10.5281/zenodo.15151481)
-
 # Vision Transformer for Fashion Image Retrieval: A Comprehensive Evaluation on Real-World Datasets
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15151481.svg)](https://doi.org/10.5281/zenodo.15151481)
 
 ## Abstract
 
-This research implements and evaluates a Content-Based Image Retrieval (CBIR) system that combines traditional computer vision techniques with modern deep learning approaches. The system leverages Facebook's FAISS (Facebook AI Similarity Search) for efficient similarity search and indexing, while comparing multiple feature extraction methods including both classical computer vision algorithms and state-of-the-art deep learning models.
-
-## Key Features
-
-- **Multiple Feature Extraction Methods:**
-
-  - Deep Learning Models:
-    - ResNet50 (Feature vector: 2,048 dimensions)
-    - Vision Transformer (ViT-B/16) (Feature vector: 768 dimensions)
-    - EfficientNetV2 (Feature vector: 1,280 dimensions)
-  - Traditional Methods:
-    - RGB Histogram (Feature vector: 768 dimensions)
-    - Local Binary Patterns (LBP) (Feature vector: 26 dimensions)
-
-- **Efficient Similarity Search:**
-
-  - Utilizes Facebook's FAISS library for fast and scalable similarity search
-  - Supports large-scale image databases with efficient indexing
-
-- **Comprehensive Evaluation:**
-  - Built-in evaluation pipeline for the Deep Fashion dataset
-  - Mean Average Precision (MAP) computation
-  - Query set evaluation capabilities
+This research presents a comprehensive evaluation of Content-Based Image Retrieval (CBIR) for fashion images, comparing traditional computer vision techniques with modern deep learning approaches. We introduce a novel implementation combining Vision Transformers (ViT) with Facebook AI Similarity Search (FAISS) for efficient similarity search. Our experimental results on both the Deep Fashion Dataset (239,557 images) and VNIU-VNR50 Dataset (1,311 images) demonstrate the superiority of ViT-based features, achieving mAP scores of 0.689 and 0.791 respectively.
 
 ## System Architecture
 
-The system follows a two-phase approach:
+### System Overview
+
+![System Architecture](readme/system_architecture.png)
+
+### Input/Output Flow
+
+![Input Output Pipeline](readme/inputOutput.png)
+
+### FAISS Indexing Architecture
+
+![FAISS Architecture](readme/faiss.png)
+
+Our system follows a two-phase approach:
 
 1. **Indexing Phase:**
-   - Feature extraction from the image database
-   - Index creation using FAISS
+
+   ```
+   Input: Database Images
+   ↓
+   Feature Extraction (ViT/ResNet50/EfficientNetV2)
+   ↓
+   FAISS Index Construction
+   ↓
+   Output: Indexed Features Database
+   ```
+
 2. **Retrieval Phase:**
-   - Query image feature extraction
-   - Similarity search using the created index
-   - Ranked retrieval of similar images
+   ```
+   Input: Query Image
+   ↓
+   Feature Extraction
+   ↓
+   FAISS Similarity Search
+   ↓
+   Output: Ranked List of Similar Images
+   ```
 
-## Technical Requirements
+### Vision Transformer (ViT) Architecture
 
-- Python 3.10
-- PyTorch with CUDA 11.7 support
-- FAISS-GPU
-- Additional dependencies listed in `requirements.txt`
+![ViT Architecture](readme/vit.png)
 
-## Installation
+Our implementation uses ViT-B/16 with the following specifications:
 
-1. Set up PyTorch with CUDA:
+- Patch size: 16x16 pixels
+- Hidden dimension: 768
+- MLP size: 3072
+- Number of heads: 12
+- Number of layers: 12
+- Input resolution: 224x224
+- Total parameters: 86M
+
+Key features:
+
+- Pre-trained on ImageNet-1K
+- Fine-tuned for fashion domain
+- CLS token used for final image representation
+
+### FAISS Implementation Details
+
+We utilize FAISS for efficient similarity search with the following configuration:
+
+```python
+def get_faiss_indexer(shape):
+
+    indexer = faiss.IndexFlatL2(shape) # features.shape[1]
+    return indexer
+```
+
+Key components:
+
+- **IndexFlatL2**: Base quantizer using L2 distance
+- **Training**: Performed on a subset of database vectors
+- **GPU Acceleration**: Enabled for faster search
+
+## Experimental Results
+
+### Dataset Overview
+
+1. **Deep Fashion Dataset Examples**
+
+![Deep Fashion Dataset Examples](readme/fashionDataset.png)
+
+2. **VNIU-VNR50 Dataset Examples**
+
+![VNIU-VNR50 Dataset Examples](readme/VNIU-VNR50.png) ![VNIU-VNR50 Sample Images](readme/vniu-vnr50-dataset.png)
+
+1. **Deep Fashion Dataset:**
+
+   - 239,557 fashion images
+   - Consumer-to-shop pairs
+   - Multiple views and poses
+
+2. **VNIU-VNR50 Dataset:**
+   - 1,311 fashion items
+   - Clean, studio-quality images
+   - Single view per item
+
+### Performance Metrics
+
+#### Deep Fashion Dataset Results
+
+| Method         | Indexing (s) | Evaluate (s) | Retrieve (s) | mAP   |
+| -------------- | ------------ | ------------ | ------------ | ----- |
+| RGB Histogram  | 16,340.03    | 43.467       | 13.088       | 0.439 |
+| LBP            | 38,002.902   | 8.492        | 12.791       | 0.385 |
+| ResNet50       | 61,564.061   | 132.337      | 11.483       | 0.679 |
+| EfficientNetV2 | 63,914.953   | 75.518       | 9.832        | 0.621 |
+| ViT            | 121,834.871  | 96.655       | 8.910        | 0.689 |
+
+#### VNIU-VNR50 Dataset Results
+
+| Method         | Indexing (s) | Evaluate (s) | Retrieve (s) | mAP   |
+| -------------- | ------------ | ------------ | ------------ | ----- |
+| RGB Histogram  | 17.997       | 0.593        | 0.023        | 0.768 |
+| LBP            | 38.373       | 1.651        | 0.056        | 0.601 |
+| ResNet50       | 93.123       | 4.342        | 0.523        | 0.750 |
+| EfficientNetV2 | 85.161       | 4.950        | 0.694        | 0.766 |
+| ViT            | 466.702      | 22.054       | 1.744        | 0.791 |
+
+## Usage Guide
+
+### Installation
+
+1. Set up the environment:
 
 ```bash
+# Create and activate conda environment
+conda create -n fashion-retrieval python=3.10
+conda activate fashion-retrieval
+
+# Install PyTorch with CUDA support
 conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
-```
 
-2. Install FAISS:
-
-```bash
+# Install FAISS
 conda install -c conda-forge faiss-gpu
-```
 
-3. Install other dependencies:
-
-```bash
+# Install other dependencies
 pip install -r requirements.txt
 ```
 
-## Dataset Structure
+### Dataset Preparation
 
-The system expects the following dataset organization:
+1. Download and organize dataset:
 
-```
+```bash
 dataset/
-├── evaluation/
-│   ├── crop/
-│   │   ├── LBP/
-│   │   ├── Resnet50/
-│   │   ├── RGBHistogram/
-│   └── original/
-├── feature/
-│   ├── LBP.index.bin
-│   ├── Resnet50.index.bin
-│   ├── RGBHistogram.index.bin
-├── groundtruth/
-├── cloth/
-└── fashion/
+├── cloth/              # Fashion images
+├── groundtruth/        # Query information
+├── feature/           # Feature indexes
+└── evaluation/        # Results
 ```
 
-## Usage
+2. Process images:
 
-### Feature Extraction and Indexing
+```python
+# Expected format for groundtruth files
+image_name left top right bottom
+```
+
+### Running the System
+
+1. Extract features:
 
 ```bash
-python indexing.py --feature_extractor Resnet50
+python indexing.py --feature_extractor VIT \
+                  --image_root dataset/cloth \
+                  --feature_root dataset/feature
 ```
 
-### Evaluation
+2. Run evaluation and compute metrics:
 
 ```bash
-# Evaluate on query set
-python ranking.py --feature_extractor Resnet50
+# Step 1: Generate ranked lists for evaluation
+python ranking.py --feature_extractor VIT \
+                 --query_root dataset/groundtruth \
+                 --top_k 11
 
-# Compute Mean Average Precision (MAP)
-python evaluate.py --feature_extractor Resnet50
+# Step 2: Compute mAP scores
+python compute.py --feature_extractor VIT
+
+# Optional: Evaluate with cropped images
+python compute.py --feature_extractor VIT --crop True
+
+# Results will show mAP scores as reported in our paper:
+# Deep Fashion Dataset: mAP = 0.689
+# VNIU-VNR50 Dataset: mAP = 0.791
 ```
 
-### Interactive Demo
+3. Launch demo interface:
 
 ```bash
 streamlit run demo.py
 ```
 
-![Demo](readme/demo.gif)
+### Interactive Demo
 
-## Configuration Options
+![Demo Interface](readme/demo.gif)
 
-The system supports various configuration parameters:
+## Technical Details
 
-- `feature_extractor`: Choose between RGBHistogram, LBP, Resnet50, ViT, or EfficientNetV2
-- `batch_size`: Adjust batch size for feature extraction
-- `top_k`: Number of similar images to retrieve
+### Input/Output Specifications
 
-## Dataset
+1. **Input Images:**
 
-This research uses the [Deep Fashion Dataset](https://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html), which contains 239,557 number of consumer/shop clothes images. The dataset includes ground truth files for evaluation.
+   - Format: RGB, JPEG/PNG
+   - Resolution: 224x224 pixels
+   - Color space: RGB
+   - Preprocessing: Center crop, normalization
 
-# Dataset Download Guide for VNIU-VNR50
+2. **Feature Vectors:**
 
-![VNIU-VNR50 Dataset](readme/VNIU-VNR50.png)
+   - ViT: 768-dimensional
+   - Format: Float32 numpy array
+   - Normalization: L2-normalized
 
-## Downloading Dataset
+3. **Query Format:**
+   - Image file
+   - Optional bounding box coordinates
+   - Supports cropped region search
 
-### Method 1: Using Web Interface
+### Key Components
 
-https://www.kaggle.com/datasets/ninhnguyentrong/vniu-vnr50
+1. **Feature Extraction (ViT):**
 
-1. Visit the dataset page on Kaggle
-2. Click the "Download" button
-3. Save the files to your local machine
-4. If downloaded as ZIP, extract the contents
+```python
+def extract_features(image):
+    # Preprocess image
+    image = preprocess(image)
 
-### Method 2: Using curl
+    # Extract patch embeddings
+    patches = self.patch_embed(image)
 
-```bash
-curl -L -o ~/Downloads/vniu-vnr50.zip\
-  https://www.kaggle.com/api/v1/datasets/download/ninhnguyentrong/vniu-vnr50
+    # Add position embeddings
+    tokens = self.pos_drop(patches + self.pos_embed)
+
+    # Transform through layers
+    for blk in self.blocks:
+        tokens = blk(tokens)
+
+    # Get CLS token embedding
+    features = tokens[:, 0]
+
+    return features
 ```
 
-After downloading, your dataset should be organized as follows:
+2. **FAISS Search:**
 
+```python
+def search_similar(query_vector, k=10):
+    # L2 normalize query vector
+    query_vector = normalize(query_vector)
+
+    # Perform k-NN search
+    distances, indices = index.search(query_vector, k)
+
+    return indices
 ```
-dataset/
-── clothes/
-   ├── image1.jpg
-   ├── image2.jpg
-   ...
-```
 
-## Acknowledgments
+## Best Practices
 
-- [FAISS](https://github.com/facebookresearch/faiss) by Facebook Research
-- Pre-trained models from [torchvision.models](https://pytorch.org/vision/stable/models.html)
-- [Deep Fashion Dataset](https://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html) by the Visual Geometry Group
+1. **Performance Optimization:**
 
-## 📌 Citation and DOI
+   - Use GPU acceleration
+   - Batch process images
+   - Precompute and cache features
 
-If you use this code or data in your research, please cite it using the DOI below:
+2. **Quality Control:**
 
-**DOI**: [https://doi.org/10.5281/zenodo.15151481](https://doi.org/10.5281/zenodo.15151481)
+   - Monitor GPU memory usage
+   - Validate feature extraction
+   - Check evaluation metrics
 
-## 📚 Related Publication
+3. **Error Handling:**
+   - Verify input formats
+   - Handle missing files
+   - Manage memory efficiently
 
-This code is associated with the article:
+## Citation
 
-**Title**: Vision Transformer for Fashion Image Retrieval: A Comprehensive Evaluation on Real-World Datasets  
-**Journal**: _The Visual Computer_ (Springer)
+If you use this code or findings in your research, please cite:
 
-Please cite this paper if you find the work helpful.
-
-```
-@article{ 10.5281/zenodo.15151481,
+```bibtex
+@article{10.5281/zenodo.15151481,
     title={Vision Transformer for Fashion Image Retrieval: A Comprehensive Evaluation on Real-World Datasets},
     author={Truc Nguyen, Ninh Nguyen, Vu Tran, Qui Nguyen, Trinh Huynh},
     journal={The Visual Computer},
     year={2025},
     publisher={Springer}
-  }
+}
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Deep Fashion Dataset from MMLAB, CUHK
+- FAISS library from Facebook Research
+- PyTorch team for ViT implementation
