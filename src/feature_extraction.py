@@ -86,13 +86,6 @@ class MyViT():
             
             # Convert to numpy and normalize
             features = features.cpu().detach().numpy()
-
-            
-            # # L2 normalize the features
-            # norm = np.linalg.norm(features)
-            # if norm > 0:
-            #     features = features / norm
-            
             
             return features
             

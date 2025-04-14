@@ -1,6 +1,6 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15151481.svg)](https://doi.org/10.5281/zenodo.15151481)
 
-# Image Retrieval in Fashion: A Content-Based Approach
+# Vision Transformer for Fashion Image Retrieval: A Comprehensive Evaluation on Real-World Datasets
 
 ## Abstract
 

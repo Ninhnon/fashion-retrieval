@@ -1,26 +1,32 @@
+import os
+import sys
 import time
+from pathlib import Path
+from PIL import Image
+
 import torch
 import faiss
-import pathlib
-from PIL import Image
-import sys
-
-import os
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
-from src.feature_extraction import MyResnet50, RGBHistogram, LBP, MyEfficientNetV2, MyViT
-from src.dataloader import get_transformation 
 import streamlit as st
 from streamlit_cropper import st_cropper
 
-st.set_page_config(layout="wide")
+from src.feature_extraction import MyResnet50, RGBHistogram, LBP, MyEfficientNetV2, MyViT
+from src.dataloader import get_transformation 
 
-# device = torch.device('cpu')
-image_root = './dataset/cloth'
-feature_root = './dataset/feature'
-# image_root = './dataset/images2'
-# feature_root = './dataset/featureFashion'
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
+# Add src directory to Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+
+# Default paths relative to project root
+DEFAULT_IMAGE_ROOT = Path('dataset/cloth')
+DEFAULT_FEATURE_ROOT = Path('dataset/feature')
+
+# Configure Streamlit page
+st.set_page_config(
+    page_title="Content-Based Image Retrieval",
+    page_icon="🔍",
+    layout="wide"
+)
 
 def get_image_list(image_root):
     image_list = []
@@ -35,7 +41,7 @@ def get_image_list(image_root):
     return image_list
 
 
-def retrieve_image(img, feature_extractor):
+def retrieve_image(img, feature_extractor, feature_root=DEFAULT_FEATURE_ROOT):
     if feature_extractor == 'Resnet50':
         extractor = MyResnet50()
     elif feature_extractor == 'EfficientNetV2':
@@ -54,28 +60,36 @@ def retrieve_image(img, feature_extractor):
     image_tensor = transform(img)
     image_tensor = image_tensor.unsqueeze(0).to('cpu')
     feat = extractor.extract_features(image_tensor)
-    indexer_path = feature_root + '/' + feature_extractor + '.index.bin'
-    if not os.path.isfile(indexer_path):
-        raise FileNotFoundError(f"Index file not found: {indexer_path}")
+    index_path = Path(feature_root) / f"{feature_extractor}.index.bin"
+    if not index_path.is_file():
+        raise FileNotFoundError(f"Index file not found: {index_path}")
 
-    indexer = faiss.read_index(indexer_path)
+    indexer = faiss.read_index(str(index_path))
     _, indices = indexer.search(feat, k=11)
     return indices[0]
 
 
-def main():
-    st.title('CONTENT-BASED IMAGE RETRIEVAL')
+def main(image_root=DEFAULT_IMAGE_ROOT, feature_root=DEFAULT_FEATURE_ROOT):
+    st.title('Content-Based Image Retrieval System')
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.header('QUERY')
 
-        st.subheader('Choose feature extractor')
-        option = st.selectbox('.', ( 'Resnet50','EfficientNetV2','VIT', 'RGBHistogram', 'LBP'))
+        st.subheader('Select Feature Extractor')
+        option = st.selectbox(
+            'Choose a feature extraction method:',
+            ('Resnet50', 'EfficientNetV2', 'VIT', 'RGBHistogram', 'LBP'),
+            help="Select the algorithm to use for feature extraction"
+        )
 
-        st.subheader('Upload image')
-        img_file = st.file_uploader(label='.', type=['png', 'jpg'])
+        st.subheader('Upload Query Image')
+        img_file = st.file_uploader(
+            label='Select an image file',
+            type=['png', 'jpg', 'jpeg'],
+            help="Upload an image to search for similar items"
+        )
 
         if img_file:
             img = Image.open(img_file)
@@ -93,8 +107,8 @@ def main():
             st.markdown('**Retrieving .......**')
             start = time.time()
 
-            retriev = retrieve_image(cropped_img, option)
-            image_list = get_image_list(image_root)
+            retrieve_list = retrieve_image(cropped_img, option, feature_root)
+            image_list = get_image_list(str(image_root))
 
             end = time.time()
             st.markdown('**Finish in ' + str(end - start) + ' seconds**')
@@ -102,57 +116,32 @@ def main():
             col3, col4 = st.columns(2)
 
             with col3:
-                image = Image.open(image_list[retriev[0]])
+                image = Image.open(image_list[retrieve_list[0]])
                 st.image(image, use_column_width = 'always')
 
             with col4:
-                image = Image.open(image_list[retriev[1]])
+                image = Image.open(image_list[retrieve_list[1]])
                 st.image(image, use_column_width = 'always')
 
             col5, col6, col7 = st.columns(3)
 
             with col5:
                 for u in range(2, 11, 3):
-                    image = Image.open(image_list[retriev[u]])
+                    image = Image.open(image_list[retrieve_list[u]])
                     st.image(image, use_column_width = 'always')
 
             with col6:
                 for u in range(3, 11, 3):
-                    image = Image.open(image_list[retriev[u]])
+                    image = Image.open(image_list[retrieve_list[u]])
                     
                     st.image(image, use_column_width = 'always')
 
             with col7:
                 for u in range(4, 11, 3):
-                    image = Image.open(image_list[retriev[u]])
+                    image = Image.open(image_list[retrieve_list[u]])
                     st.image(image, use_column_width = 'always')
-                # for i in range(11):
-                #     print(image_list[retriev[i]])
        
 
 if __name__ == '__main__':
     main()
 
-
-## Folder have many sub folders
-# def get_image_list(image_root):
-#     def list_images(root):
-#         image_list = []
-#         for entry in root.iterdir():
-#             if entry.is_file() and entry.suffix.lower() in ['.jpg', '.jpeg', '.png']:
-#                 image_list.append(entry)
-#             elif entry.is_dir():
-#                 # Recursively scan subdirectories
-#                 image_list.extend(list_images(entry))
-#         return image_list
-    
-#     image_root = pathlib.Path(image_root)
-#     if not image_root.exists():
-#         print(f"Error: Directory {image_root} does not exist.")
-#         return []
-    
-#     image_list = list_images(image_root)
-#     image_list = sorted(image_list, key=lambda x: x.name)
-#     return image_list
-
-# Get the list of images in 1 folder
